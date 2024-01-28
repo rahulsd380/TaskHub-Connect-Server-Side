@@ -29,6 +29,7 @@ async function run() {
 
     const userCollection = client.db("taskHubConnect").collection('users');
     const taskCollection = client.db("taskHubConnect").collection('tasks');
+    const commentsCollection = client.db("taskHubConnect").collection('comments');
 
  
 
@@ -100,6 +101,45 @@ async function run() {
       const result = await taskCollection.updateOne(query, updatedDoc);
       res.send(result)
     });
+
+
+    //Update task info
+      app.put('/tasks/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)};
+      const updatedData = req.body;
+      const updatedDoc = {
+        $set : {
+          userName: updatedData.userName,
+          title: updatedData.title,
+          deadline: updatedData.deadline,
+          priority: updatedData.priority,
+          taskDescription: updatedData.taskDescription,
+        }
+      }
+      const result = await taskCollection.updateOne(query, updatedDoc);
+      res.send(result);
+    })
+
+
+    // Post comment data to database
+    app.post('/comments', async(req, res)=> {
+      const commentInfo = req.body;
+      const result = await commentsCollection.insertOne(commentInfo);
+      res.send(result);
+  })
+
+
+  //Get comment data by postId
+  app.get('/comments/:postId', async (req, res) => {
+    const postId = req.params.postId;
+    const query = { postId: postId };
+    const cursor = commentsCollection.find(query);
+    const result = await cursor.toArray();
+    res.json(result);
+  });
+  
+  
 
 
 
