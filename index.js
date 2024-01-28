@@ -33,7 +33,7 @@ async function run() {
  
 
 
-
+// Post user data while registration 
     app.post('/users', async(req, res)=> {
         const user = req.body;
         const result = await userCollection.insertOne(user);
@@ -41,13 +41,21 @@ async function run() {
     })
 
 
-
+// Post task data to database
     app.post('/tasks', async(req, res)=> {
         const taskInfo = req.body;
-        const result = await userCollection.insertOne(taskInfo);
+        const result = await taskCollection.insertOne(taskInfo);
         res.send(result);
     })
 
+    app.get('/users', async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    })
+
+
+    // Get all task details for specific user
     app.get('/tasks' , async(req, res) => {
       let query = {};
       if(req.query?.email){
@@ -56,6 +64,43 @@ async function run() {
       const result = await taskCollection.find(query).toArray();
       res.send(result);
     })
+
+
+    // Task delete api
+    app.delete('/tasks/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const result = await taskCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    //Update task status to On-going
+    app.patch('/tasks/ongoing/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const updatedDoc = {
+        $set : {
+          status: 'On-going'
+        }
+      }
+      const result = await taskCollection.updateOne(query, updatedDoc);
+      res.send(result)
+    });
+
+
+    //Update task status to Completed
+    app.patch('/tasks/completed/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const updatedDoc = {
+        $set : {
+          status: 'Completed'
+        }
+      }
+      const result = await taskCollection.updateOne(query, updatedDoc);
+      res.send(result)
+    });
+
 
 
 
