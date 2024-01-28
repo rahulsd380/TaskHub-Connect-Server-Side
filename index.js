@@ -42,6 +42,23 @@ async function run() {
 
 
 
+    app.post('/tasks', async(req, res)=> {
+        const taskInfo = req.body;
+        const result = await userCollection.insertOne(taskInfo);
+        res.send(result);
+    })
+
+    app.get('/tasks' , async(req, res) => {
+      let query = {};
+      if(req.query?.email){
+        query = { email : req.query.email}
+      }
+      const result = await taskCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
+
 
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
