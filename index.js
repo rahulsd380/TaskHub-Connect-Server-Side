@@ -30,6 +30,7 @@ async function run() {
     const userCollection = client.db("taskHubConnect").collection('users');
     const taskCollection = client.db("taskHubConnect").collection('tasks');
     const commentsCollection = client.db("taskHubConnect").collection('comments');
+    const collaboratorsCollection = client.db("taskHubConnect").collection('collaborators');
 
  
 
@@ -56,15 +57,62 @@ async function run() {
     })
 
 
+    //Delete user (admin dashboard)
+    app.delete('/users/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id)};
+      const result = await userCollection.deleteOne(query);
+      res.send(result);
+    });
+
+
+      //Make admin (admin route)
+  app.patch('/users/admin/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id)};
+    const updatedDoc = {
+      $set : {
+        role: 'admin'
+      }
+    }
+    const result = await userCollection.updateOne(query, updatedDoc);
+    res.send(result)
+  });
+
+
+      //Remove user from admin panel (admin dashboard)
+  app.patch('/users/user/:id', async(req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id)};
+    const updatedDoc = {
+      $set : {
+        role: 'user'
+      }
+    }
+    const result = await userCollection.updateOne(query, updatedDoc);
+    res.send(result)
+  });
+
+
+
+// //Get all tasks data for admin dashboard
+//     app.get('/tasks', async (req, res) => {
+//       const cursor = taskCollection.find();
+//       const result = await cursor.toArray();
+//       res.send(result);
+//     })
+
+
     // Get all task details for specific user
-    app.get('/tasks' , async(req, res) => {
+    app.get('/tasks', async (req, res) => {
       let query = {};
-      if(req.query?.email){
-        query = { email : req.query.email}
+      if (req.query.email) {
+        query = { email: req.query.email }
       }
       const result = await taskCollection.find(query).toArray();
       res.send(result);
-    })
+    });
+    
 
 
     // Task delete api
@@ -138,9 +186,24 @@ async function run() {
     const result = await cursor.toArray();
     res.json(result);
   });
-  
-  
 
+
+    // Post comment data to database
+    app.post('/collaborators', async(req, res)=> {
+      const collaboratorsInfo = req.body;
+      const result = await collaboratorsCollection.insertOne(collaboratorsInfo);
+      res.send(result);
+  })
+
+
+  //Get comment data by postId
+  app.get('/collaborators/:collaboratorId', async (req, res) => {
+    const collaboratorId = req.params.collaboratorId;
+    const query = { collaboratorId: collaboratorId };
+    const cursor = collaboratorsCollection.find(query);
+    const result = await cursor.toArray();
+    res.json(result);
+  });
 
 
 
