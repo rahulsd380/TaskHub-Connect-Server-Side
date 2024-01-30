@@ -43,6 +43,17 @@ async function run() {
     })
 
 
+    //Get users data
+    app.get('/users', async(req,res)=> {
+      let query = {};
+      if(req.query?.email){
+        query = { email : req.query.email}
+      }
+      const result = await userCollection.find(query).toArray();
+      res.send(result);
+    })
+
+
 // Post task data to database
     app.post('/tasks', async(req, res)=> {
         const taskInfo = req.body;
@@ -50,11 +61,6 @@ async function run() {
         res.send(result);
     })
 
-    app.get('/users', async (req, res) => {
-      const cursor = userCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
-    })
 
 
     //Delete user (admin dashboard)
